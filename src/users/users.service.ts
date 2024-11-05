@@ -7,13 +7,15 @@ import {
 
 import * as bcrypt from 'bcrypt';
 
-import { Repository } from 'typeorm';
+import { Repository, ArrayContains } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { SignupInput } from 'src/auth/dto/signup.input';
 
-import { UpdateUserInput } from './dto/update-user.input';
+// import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
+import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
+import { UpdateUserInput } from './dto/update-user.input';
 
 @Injectable()
 export class UsersService {
@@ -37,8 +39,22 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<User[]> {
-    return [];
+  async findAll(roles: ValidRoles[]): Promise<User[]> {
+    if (roles.length === 0) {
+      return await this.userRepository.find({
+        // relations: {
+        //   lastUpdateBy: true,
+        // },
+        //  No es necesario por que tenemos lazy en el entity
+      });
+    }
+
+    const users = await this.userRepository.find({
+      where: {
+        roles: ArrayContains(roles),
+      },
+    });
+    return users;
   }
 
   async findOne(id: string): Promise<User> {
@@ -61,12 +77,28 @@ export class UsersService {
     }
   }
 
-  update(id: number, updateUserInput: UpdateUserInput) {
-    return `This action updates a #${id} user`;
+  async update(
+    updateUserInput: UpdateUserInput,
+    adminUser: User,
+  ): Promise<User> {
+    let user = await this.findOne(updateUserInput.id);
+
+    user = {
+      ...user,
+      ...updateUserInput,
+      lastUpdateBy: adminUser,
+    };
+
+    return await this.userRepository.save(user);
   }
 
-  block(id: string): Promise<User> {
-    throw new Error('Method not implemented.');
+  async block(id: string, adminUser: User): Promise<User> {
+    const userToBlock = await this.findOne(id);
+
+    userToBlock.isActive = false;
+    userToBlock.lastUpdateBy = adminUser;
+
+    return await this.userRepository.save(userToBlock);
   }
 
   private handleDBError(error: any): never {
