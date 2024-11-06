@@ -1,8 +1,7 @@
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
 import {
   IsNotEmpty,
   IsOptional,
-  IsPositive,
   IsString,
   MaxLength,
   MinLength,
@@ -16,9 +15,9 @@ export class CreateItemInput {
   @MaxLength(30)
   name: string;
 
-  @Field(() => Int)
-  @IsPositive()
-  quantity: number;
+  // @Field(() => Int)
+  // @IsPositive()
+  // quantity: number;
 
   @Field(() => String, { nullable: true })
   @IsString()
