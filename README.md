@@ -16,4 +16,13 @@
 5. Levantar el server de nest
    `pnpm start:dev`
 
-6. Visitar localhost:3000/graphql
+6. Visitar
+   `localhost:3000/graphql`
+
+7. Ejecutar el seed, **"mutation"**, para llenar la base de datos
+
+```
+mutation Mutation {
+  runSeed
+}
+```
