@@ -21,7 +21,7 @@
 
 7. Ejecutar el seed, **"mutation"**, para llenar la base de datos
 
-```
+```graphql
 mutation Mutation {
   runSeed
 }

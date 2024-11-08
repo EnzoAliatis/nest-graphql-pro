@@ -5,6 +5,8 @@ import { Item } from './entities/item.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { PaginationArgs } from 'src/common/dto/pagination.args';
+import { SearchArgs } from 'src/common/dto/search.args';
 
 @Injectable()
 export class ItemsService {
@@ -22,14 +24,27 @@ export class ItemsService {
     return await this.itemRepository.save(item);
   }
 
-  async findAll(user: User): Promise<Item[]> {
-    // TODO: filter, pagination, etc.
+  async findAll(
+    user: User,
+    paginationArgs?: PaginationArgs,
+    searchArgs?: SearchArgs,
+  ): Promise<Item[]> {
+    const { limit = 10, offset = 0 } = paginationArgs;
+    const { q = '' } = searchArgs;
 
-    const items = await this.itemRepository.find({
-      where: { user: { id: user.id } },
-    });
+    const queryBuilder = this.itemRepository
+      .createQueryBuilder()
+      .take(limit)
+      .skip(offset)
+      .where('"userId" = :userId', { userId: user.id });
 
-    return items;
+    if (q) {
+      queryBuilder.andWhere('LOWER(name) LIKE :q', {
+        q: `%${q.toLowerCase()}%`,
+      });
+    }
+
+    return await queryBuilder.getMany();
   }
 
   async findOne(id: string, user: User): Promise<Item> {
@@ -67,6 +82,10 @@ export class ItemsService {
   }
 
   async itemCountByUser(user: User): Promise<number> {
-    return (await this.findAll(user)).length;
+    return (
+      await this.itemRepository.find({
+        where: { user: { id: user.id } },
+      })
+    ).length;
   }
 }
