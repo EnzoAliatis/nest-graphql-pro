@@ -11,6 +11,24 @@ type User {
   lastUpdateBy: User
   itemsCount: Int!
   items(offset: Int! = 0, limit: Int! = 10, q: String): [Item!]!
+  lists(offset: Int! = 0, limit: Int! = 10, q: String): [Item!]!
+  listsCount: Int!
+}
+
+type List {
+  id: ID!
+  name: String!
+  user: User!
+  items(offset: Int! = 0, limit: Int! = 10, q: String): [ListItem!]!
+  totalItems: Float!
+}
+
+type ListItem {
+  id: ID!
+  quantity: Float!
+  completed: Boolean!
+  list: List!
+  item: Item!
 }
 
 type Item {
@@ -18,6 +36,7 @@ type Item {
   name: String!
   quantityUnits: String
   user: User!
+  listItem: [ListItem!]!
 }
 
 type AuthResponse {
@@ -30,6 +49,9 @@ type Query {
   item(id: ID!): Item!
   users(roles: [ValidRoles!] = []): [User!]!
   user(id: ID!): User!
+  lists(offset: Int! = 0, limit: Int! = 10, q: String): [List!]!
+  list(id: ID!): List!
+  listItem(id: ID!): ListItem!
   revalidate: AuthResponse!
 }
 
@@ -45,6 +67,12 @@ type Mutation {
   removeItem(id: ID!): Item!
   updateUser(updateUserInput: UpdateUserInput!): User!
   blockUser(id: ID!): User!
+  createList(createListInput: CreateListInput!): List!
+  updateList(updateListInput: UpdateListInput!): List!
+  removeList(id: String!): List!
+  createListItem(createListItemInput: CreateListItemInput!): ListItem!
+  updateListItem(updateListItemInput: UpdateListItemInput!): ListItem!
+  removeListItem(id: Int!): ListItem!
   signup(signupInput: SignupInput!): AuthResponse!
   login(loginInput: LoginInput!): AuthResponse!
 
@@ -70,6 +98,30 @@ input UpdateUserInput {
   id: ID!
   isActive: Boolean
   roles: [ValidRoles!]
+}
+
+input CreateListInput {
+  name: String!
+}
+
+input UpdateListInput {
+  name: String
+  id: ID!
+}
+
+input CreateListItemInput {
+  quantity: Float = 0
+  completed: Boolean = false
+  listId: ID!
+  itemId: ID!
+}
+
+input UpdateListItemInput {
+  quantity: Float = 0
+  completed: Boolean = false
+  listId: ID
+  itemId: ID
+  id: ID!
 }
 
 input SignupInput {

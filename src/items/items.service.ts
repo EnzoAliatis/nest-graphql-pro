@@ -48,15 +48,15 @@ export class ItemsService {
   }
 
   async findOne(id: string, user: User): Promise<Item> {
-    const todo = await this.itemRepository.findOne({
+    const item = await this.itemRepository.findOne({
       where: { id, user: { id: user.id } },
     });
 
-    if (!todo) {
+    if (!item) {
       throw new NotFoundException(`Item #${id} not found`);
     }
 
-    return todo;
+    return item;
   }
 
   async update(updateItemInput: UpdateItemInput, user: User): Promise<Item> {
@@ -82,10 +82,8 @@ export class ItemsService {
   }
 
   async itemCountByUser(user: User): Promise<number> {
-    return (
-      await this.itemRepository.find({
-        where: { user: { id: user.id } },
-      })
-    ).length;
+    return await this.itemRepository.count({
+      where: { user: { id: user.id } },
+    });
   }
 }

@@ -4,9 +4,10 @@ import { UsersResolver } from './users.resolver';
 import { User } from './entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ItemsModule } from 'src/items/items.module';
+import { ListsModule } from 'src/lists/lists.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), ItemsModule],
+  imports: [TypeOrmModule.forFeature([User]), ItemsModule, ListsModule],
   providers: [UsersResolver, UsersService],
   exports: [UsersService, TypeOrmModule],
 })
